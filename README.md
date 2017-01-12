@@ -6,4 +6,4 @@ Goal: show how hockey has become much more global.
 
 Uses D3.js and Leaflet for viz.
 
-Uses Mongo/Mongoose to store data. See `/scraper` for data collection. Defaults to use a local database `leafDB` that will need to be created before running.
+The data was converted into geojson format. To get raw data, see `/scraper` for data collection. Use Mongo/Mongoose to store data––defaults to use a local database `leafDB` that will need to be created before running.
