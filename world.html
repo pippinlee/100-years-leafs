@@ -1,0 +1,204 @@
+<html>
+<head>
+  <title>100 Years of Leaf Players - Birth cities</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.0.2/dist/leaflet.css"/>
+
+  <link href='https://fonts.googleapis.com/css?family=PT+Sans:400,700,400italic,700italic' rel='stylesheet' type='text/css'>
+  <link rel="stylesheet" href="pulse.css" />
+  <style>
+
+
+    #map, #world {
+      margin: 0 auto;
+      padding: 0;
+      height:100%;
+      width: 100%;
+    }
+
+    #world {
+      margin-top: 100px;
+      height: 80%;
+    }
+
+    @media (max-width: 500px) {
+      #map, #world {
+        height: 90vh;
+        width: 96vw;
+      }
+      #world {
+        height: 45vh;
+      }
+
+    }
+
+    .gps_ring { 
+      border: 3px solid #999;
+      -webkit-border-radius: 30px;
+      height: 18px;
+      width: 18px;   
+      -webkit-animation: pulsate 500ms ease-out;
+      -webkit-animation-iteration-count: 1; 
+      /*opacity: 0.0*/
+    }
+    
+    @-webkit-keyframes pulsate {
+        0% {-webkit-transform: scale(0.1, 0.1); opacity: 0.0;}
+        50% {opacity: 1.0;}
+        100% {-webkit-transform: scale(1.2, 1.2); opacity: 0.0;}
+    }
+    .year, .yearWorld {
+      font-family: "PT Sans";
+      font-size: 32px;
+      font-weight: 900;
+      padding: 20px;
+      padding-top: 10px;
+      padding-bottom: 10px;
+      margin-left: 10px;
+      margin-bottom: 10px;
+      background-color: #999;
+      z-index: 99999;
+    }
+    button {
+      border-radius: 0;
+      background-color: #187b86;
+      border: 1px solid #999;
+      font-size: 16px;
+      font-family: "PT Sans";
+      padding: 5px;
+      font-weight: 900;
+      text-transform: uppercase;
+      color: #fff;
+      border-top: 0;
+      border-bottom-left-radius: 5px;
+      border-bottom-right-radius: 5px;
+    }
+    button:hover {
+      background-color: #2acfe0;
+    }
+    body {
+      margin: 0 auto;
+      padding: 0;
+      text-align: center;
+      padding-bottom: 100px;
+    }
+  </style>
+</head>
+<body>
+
+  <div id="world"></div>
+  <button>Run again</button>
+
+
+
+  <script src="https://unpkg.com/leaflet@1.0.2/dist/leaflet.js"></script>
+  <script src="https://code.jquery.com/jquery-3.1.1.min.js"
+  integrity="sha256-hVVnYaiADRTO2PzUGmuLJr8BLUSjGIZsDYGmIJLv2b8="
+  crossorigin="anonymous"></script>
+  <script src="pulse.js"></script>
+
+  <script>
+
+  $("button").click(function(){
+    location.reload();
+  })
+
+
+  // initialize the map
+  // whole world
+  //var map = L.map('map').setView([43.35, -5.08], 3);
+  //canada
+  //var map = L.map('map').setView([43.35, -80.08], 4);
+  // local
+  //var map = L.map('map').setView([45.35, -88.08], 3);
+
+  // listen for screen resize events
+  var windowWidth = document.documentElement.clientWidth;
+  var windowHeight = document.documentElement.clientHeight;
+  var setZoomWorld;
+  var setWorldLatLng;
+  // order: desktop, ipad, phone
+  if (windowWidth > 1000 && windowHeight > 800) {
+    setZoomWorld = 3;
+    setWorldLatLng = [43.35, -5.08]
+  } else if (windowWidth < 450 && windowHeight < 750) {
+    setZoomWorld =1;
+    setWorldLatLng = [45.35, -88.08 ]
+  } else if (windowWidth < 1000 && windowHeight > 750) {
+    setZoomWorld = 1;
+    setWorldLatLng = [43.35, -10.08]
+  } else {
+    setZoomWorld = 3;
+    setWorldLatLng = [43.35, -5.08]
+  }
+  console.log(setWorldLatLng)
+
+
+  startWorld();
+
+  
+  var world = L.map('world', { zoomControl:true, scrollWheelZoom:false, dragging: true, touchZoom: false, tap: false }).setView(setWorldLatLng, setZoomWorld);
+  
+  L.tileLayer('http://{s}.sm.mapstack.stamen.com/(toner-lite,$fff[difference],$fff[@23],$fff[hsl-saturation@20])/{z}/{x}/{y}.png').addTo(world);
+
+  var pulsingIcon = L.icon.pulse({iconSize:[5,5],color:'#2acfe0'});
+
+  $('#world div.leaflet-bottom.leaflet-left').html('<div class="yearWorld">' + 1917 + '</div>');
+
+  // popup details
+
+  function onEachFeatureWorld(feature, layer) {
+      // does this feature have a property named popupContent?
+      if (feature.properties.name) {
+          layer.bindPopup(
+            `<h3 style="font-family:PT Sans">` + feature.properties.name + "</h3>"
+          );
+          // change popup event from click to hover
+          layer.on('mouseover', function() { layer.openPopup(); });
+          layer.on('mouseout', function() { layer.closePopup(); });
+      }
+  }
+
+  function startWorld(){
+    var geoData = $.getJSON('latlng.geojson', function(data) {
+
+      //var test = L.geoJSON(data).addTo(map);
+      var worldMap;
+
+      function renderPlayersWorld(){
+        for (var i = 0; i < data.features.length; i++) {
+          (function(i){
+            setTimeout(function() {
+              worldMap = L.geoJSON(data.features[i], {
+                onEachFeature: onEachFeatureWorld,
+                pointToLayer: function(feature, latlng) {
+                  // add pulse to map
+                  return L.marker(latlng, {icon: pulsingIcon});
+                }
+              })
+              worldMap.addTo(world);
+
+              // update year on page
+
+              setTimeout(function(){
+                              
+              var worldYear = data.features[i].properties.year;
+                $('#world div.leaflet-bottom.leaflet-left').html('<div class="yearWorld">' + worldYear + '</div>');
+              }, 500);
+
+            }, 13 * i);
+          }(i));
+        }
+      }
+
+      // wait till tiles load before starting
+      setTimeout(function(){
+        renderPlayersWorld();
+      }, 500);
+
+    });
+  }
+
+  </script>
+</body>
+</html>

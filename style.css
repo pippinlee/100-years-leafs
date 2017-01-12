@@ -1,0 +1,73 @@
+#map, #world {
+  margin: 0 auto;
+  padding: 0;
+  height: 90%;
+  width: 90%;
+  margin-top: 50px;
+}
+
+#world {
+  margin-top: 100px;
+  height: 40%;
+}
+
+@media (max-width: 500px) {
+  #map, #world {
+    height: 90vh;
+    width: 96vw;
+    margin-top: 0`;
+  }
+  #world {
+    height: 45vh;
+  }
+}
+
+.gps_ring { 
+  border: 3px solid #999;
+  -webkit-border-radius: 30px;
+  height: 18px;
+  width: 18px;   
+  -webkit-animation: pulsate 500ms ease-out;
+  -webkit-animation-iteration-count: 1; 
+}
+
+@-webkit-keyframes pulsate {
+    0% {-webkit-transform: scale(0.1, 0.1); opacity: 0.0;}
+    50% {opacity: 1.0;}
+    100% {-webkit-transform: scale(1.2, 1.2); opacity: 0.0;}
+}
+.year, .yearWorld {
+  font-family: "PT Sans";
+  font-size: 32px;
+  font-weight: 900;
+  padding: 20px;
+  padding-top: 10px;
+  padding-bottom: 10px;
+  margin-left: 10px;
+  margin-bottom: 10px;
+  background-color: #999;
+  z-index: 99999;
+}
+button {
+  border-radius: 0;
+  background-color: #187b86;
+  border: 1px solid #999;
+  font-size: 16px;
+  font-family: "PT Sans";
+  padding: 5px;
+  font-weight: 900;
+  text-transform: uppercase;
+  color: #fff;
+  border-top: 0;
+  border-bottom-left-radius: 5px;
+  border-bottom-right-radius: 5px;
+}
+button:hover {
+  background-color: #2acfe0;
+}
+body {
+  margin: 0 auto;
+  padding: 0;
+  text-align: center;
+  padding-bottom: 100px;
+}

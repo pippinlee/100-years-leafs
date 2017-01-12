@@ -1,0 +1,111 @@
+<html>
+<head>
+  <title>100 Years of Leaf Players - Birth cities</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.0.2/dist/leaflet.css"/>
+
+  <link href='https://fonts.googleapis.com/css?family=PT+Sans:400,700,400italic,700italic' rel='stylesheet' type='text/css'>
+  <link rel="stylesheet" href="pulse.css" />
+  <link rel="stylesheet" type="text/css" href="style.css">
+
+</head>
+<body>
+
+  <div id="map"></div>
+  <button>Run again</button>
+
+  <script src="https://unpkg.com/leaflet@1.0.2/dist/leaflet.js"></script>
+  <script src="https://code.jquery.com/jquery-3.1.1.min.js"
+  integrity="sha256-hVVnYaiADRTO2PzUGmuLJr8BLUSjGIZsDYGmIJLv2b8="
+  crossorigin="anonymous"></script>
+  <script src="pulse.js"></script>
+
+  <script>
+
+  $("button").click(function(){
+    location.reload();
+  })
+
+
+  // initialize the map
+  // whole world
+  //var map = L.map('map').setView([43.35, -5.08], 3);
+  //canada
+  //var map = L.map('map').setView([43.35, -80.08], 4);
+  // local
+  //var map = L.map('map').setView([45.35, -88.08], 3);
+
+  // listen for screen resize events
+  var windowWidth = document.documentElement.clientWidth;
+  var windowHeight = document.documentElement.clientHeight;
+  var setZoomCanada;
+  // order: desktop, ipad, phone
+  if (windowWidth > 1000 && windowHeight > 800) {
+    setZoomCanada = 5;
+  } else if (windowWidth < 450 && windowHeight < 750) {
+    setZoomCanada = 3;
+  } else if (windowWidth < 1000 && windowHeight > 750) {
+    setZoomCanada = 3;
+  } else {
+    setZoomCanada = 4;
+  }
+
+  var map = L.map('map', { zoomControl:true, scrollWheelZoom:false, dragging: true, touchZoom: false, tap: false }).setView([45.35, -88.08], setZoomCanada);
+
+  $('#map div.leaflet-bottom.leaflet-left').html('<div class="year">' + 1917 + '</div>');
+
+  L.tileLayer('http://{s}.sm.mapstack.stamen.com/(toner-lite,$fff[difference],$fff[@23],$fff[hsl-saturation@20])/{z}/{x}/{y}.png').addTo(map);
+
+  var pulsingIcon = L.icon.pulse({iconSize:[8,8],color:'#2acfe0'});
+
+  // popup details
+  function onEachFeature(feature, layer) {
+      // does this feature have a property named popupContent?
+      if (feature.properties.name) {
+          layer.bindPopup(
+            `<h3 style="font-family:PT Sans">` + feature.properties.name + "</h3>"
+          );
+          // change popup event from click to hover
+          layer.on('mouseover', function() { layer.openPopup(); });
+          layer.on('mouseout', function() { layer.closePopup(); });
+      }
+  }
+
+  var geoData = $.getJSON('latlng.geojson', function(data) {
+
+    var canadaMap;
+
+    function renderPlayers(){
+      for (var i = 0; i < data.features.length; i++) {
+        (function(i){
+          setTimeout(function() {
+            canadaMap = L.geoJSON(data.features[i], {
+              onEachFeature: onEachFeature,
+              pointToLayer: function(feature, latlng) {
+                // add pulse to map
+                return L.marker(latlng, {icon: pulsingIcon});
+              }
+            })
+            canadaMap.addTo(map);
+
+            // update year on page
+            var year = data.features[i].properties.year;
+
+            setTimeout(function(){
+              $('#map div.leaflet-bottom.leaflet-left').html('<div class="year">' + year + '</div>');
+            }, 1600);
+          }, 30 * i);
+        }(i));
+      }
+    }
+
+    // wait till tiles load before starting
+    setTimeout(function(){
+      renderPlayers();
+    }, 500);
+
+  });
+
+  </script>
+</body>
+</html>
